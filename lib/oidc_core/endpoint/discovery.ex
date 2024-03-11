@@ -1,5 +1,5 @@
-defmodule OIDC.Endpoint.Discovery do
-  use OIDC.Endpoint
+defmodule OIDCCore.Endpoint.Discovery do
+  use OIDCCore.Endpoint
 
   def init(opts \\ []) do
     opts

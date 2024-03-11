@@ -10,7 +10,7 @@ defmodule Demo.Application do
     children = [
       # Starts a worker by calling: Demo.Worker.start_link(arg)
       # {Demo.Worker, arg}
-			{Bandit, plug: OIDC.Router}
+			{Bandit, plug: OIDCCore.Router}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

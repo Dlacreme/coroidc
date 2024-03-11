@@ -1,6 +1,6 @@
-defmodule OIDC.HTTP.JSONContentTest do
-  use OIDCTest.ConnCase
-  alias OIDC.HTTP.JSONContent
+defmodule OIDCCore.HTTP.JSONContentTest do
+  use OIDCCoreTest.ConnCase
+  alias OIDCCore.HTTP.JSONContent
 
   test "set the correct headers" do
     conn =

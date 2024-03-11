@@ -1,4 +1,4 @@
-defmodule OIDC.Endpoint do
+defmodule OIDCCore.Endpoint do
   @moduledoc """
   Helpers for returning valid HTTP response.
   """
@@ -8,7 +8,7 @@ defmodule OIDC.Endpoint do
       use Plug.Builder
       import Plug.Conn
 
-      plug(OIDC.HTTP.JSONContent)
+      plug(OIDCCore.HTTP.JSONContent)
     end
   end
 end

@@ -1,4 +1,4 @@
-defmodule OIDCTest.ConnCase do
+defmodule OIDCCoreTest.ConnCase do
   use ExUnit.CaseTemplate
 
   using do
