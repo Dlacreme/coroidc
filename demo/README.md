@@ -1,20 +1,21 @@
-# OpenID Connect Server
+# Demo
 
-Standard OpenID connect server implementation.
+**TODO: Add description**
 
 ## Installation
 
 If [available in Hex](https://hex.pm/docs/publish), the package can be installed
-by adding `oidc` to your list of dependencies in `mix.exs`:
+by adding `demo` to your list of dependencies in `mix.exs`:
 
 ```elixir
 def deps do
   [
-    {:oidc, "~> 0.1.0"}
+    {:demo, "~> 0.1.0"}
   ]
 end
 ```
 
 Documentation can be generated with [ExDoc](https://github.com/elixir-lang/ex_doc)
 and published on [HexDocs](https://hexdocs.pm). Once published, the docs can
-be found at <https://hexdocs.pm/oidc>.
+be found at <https://hexdocs.pm/demo>.
+
