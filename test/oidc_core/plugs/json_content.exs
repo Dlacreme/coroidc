@@ -1,6 +1,6 @@
-defmodule OIDCCore.HTTP.JSONContentTest do
+defmodule OIDCCore.Plugs.JSONContentTest do
   use OIDCCoreTest.ConnCase
-  alias OIDCCore.HTTP.JSONContent
+  alias OIDCCore.Plugs.JSONContent
 
   test "set the correct headers" do
     conn =

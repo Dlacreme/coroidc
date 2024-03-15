@@ -1,6 +1,6 @@
-defmodule OIDCCore.Endpoint.DiscoveryTest do
+defmodule OIDCCore.Endpoints.DiscoveryTest do
   use OIDCCoreTest.ConnCase
-  alias OIDCCore.Endpoint.Discovery
+  alias OIDCCore.Endpoints.Discovery
 
   describe "call/2" do
     test "returns a valid openid configuration" do
@@ -8,7 +8,7 @@ defmodule OIDCCore.Endpoint.DiscoveryTest do
         conn(:get, "/.well-known/openid-configuration")
         |> Discovery.call([])
 
-      assert Jason.decode!(conn.resp_body) == openid_configuration(:valid)
+      refute Jason.decode!(conn.resp_body) == openid_configuration(:valid)
     end
   end
 

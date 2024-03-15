@@ -1,4 +1,4 @@
-defmodule OIDCCore.Endpoint do
+defmodule OIDCCore.Endpoints do
   @moduledoc """
   Helpers for returning valid HTTP response.
   """
@@ -8,7 +8,14 @@ defmodule OIDCCore.Endpoint do
       use Plug.Builder
       import Plug.Conn
 
-      plug(OIDCCore.HTTP.JSONContent)
+      plug(OIDCCore.Plugs.JSONContent)
+
+      plug(Plug.Parsers,
+        parsers: [:urlencoded, :multipart, :json],
+        json_decoder: Jason
+      )
+
+      plug(OIDCCore.Plugs.ParamBuilder)
     end
   end
 end

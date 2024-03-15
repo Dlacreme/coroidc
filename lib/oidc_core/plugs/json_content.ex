@@ -1,4 +1,4 @@
-defmodule OIDCCore.HTTP.JSONContent do
+defmodule OIDCCore.Plugs.JSONContent do
   import Plug.Conn
 
   def init(opts \\ []), do: opts
