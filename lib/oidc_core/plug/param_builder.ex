@@ -1,4 +1,5 @@
-defmodule OIDCCore.Plugs.ParamBuilder do
+defmodule OIDCCore.Plug.ParamBuilder do
+  use Plug.Builder
   def init(opts \\ []), do: opts
 
   def call(conn, _opts) do

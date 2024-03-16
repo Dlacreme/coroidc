@@ -1,3 +1,5 @@
 import Config
 
-config :oidc_core, OIDCCore.Server, authorization: OIDCCoreTest.Server.Authorization
+config :oidc_core, OIDCCore.Server,
+  error_page_url: "/test/error",
+  authentication_form_url: "/test/login"
