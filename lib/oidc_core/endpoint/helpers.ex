@@ -2,7 +2,7 @@ defmodule OIDCCore.Endpoint.Helpers do
   import Plug.Conn
 
   @error_url Application.compile_env(:oidc_core, OIDCCore.Server)[
-               :authentication_form_url
+               :error_page_url
              ]
 
   def redirect_to(conn, url) do

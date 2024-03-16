@@ -26,6 +26,20 @@ defmodule OIDCCore.Endpoint.AuthorizationTest do
       assert URI.parse(redirected_to).query
              |> URI.decode_query() == params
     end
+
+    test "redirects to error page with meaningful errors" do
+      url = authorization_url(%{})
+
+      conn =
+        conn(:get, url)
+        |> Authorization.call([])
+
+      assert conn.resp_body =~
+               ~s(value="400")
+
+      assert conn.resp_body =~
+               ~s(value="Missing parameters: client_id, redirect_uri, response_type, scope")
+    end
   end
 
   defp authorization_url(params) do

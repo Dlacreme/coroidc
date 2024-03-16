@@ -31,9 +31,9 @@ defmodule OIDCCore.Endpoint.Authorization do
   Once the user successfully logged-in we redirect
   them to the client application.
   """
-
-  #  def callback(conn, user_id) when is_binary(user_id) do
-  # end
+  def callback(conn, user_id) when is_binary(user_id) do
+    conn
+  end
 
   defp validate_oidc_parameters(conn) do
     with {:ok, conn} <- validate_required_parameters(conn) do
