@@ -5,10 +5,7 @@ defmodule OIDCCore.Endpoint.Authorization do
   host application to authenticate the user.
   """
   use OIDCCore.Endpoint
-
-  @authentication_form_url Application.compile_env(:oidc_core, OIDCCore.Server)[
-                             :authentication_form_url
-                           ]
+  alias OIDCCore.Server.Callback, as: ServerCallback
 
   def init(opts \\ []) do
     opts
@@ -20,19 +17,12 @@ defmodule OIDCCore.Endpoint.Authorization do
     case validate_oidc_parameters(conn) do
       {:ok, conn} ->
         conn
-        |> redirect_to(build_url(@authentication_form_url, conn.query_params))
+        |> ServerCallback.redirect_to_authentication()
 
       {:error, message} ->
-        redirect_to_error(conn, 400, message)
+        conn
+        |> ServerCallback.handle_error(message, http_code: 400)
     end
-  end
-
-  @doc """
-  Once the user successfully logged-in we redirect
-  them to the client application.
-  """
-  def callback(conn, user_id) when is_binary(user_id) do
-    conn
   end
 
   defp validate_oidc_parameters(conn) do
@@ -54,11 +44,5 @@ defmodule OIDCCore.Endpoint.Authorization do
     else
       {:error, "Missing parameters: #{Enum.join(missing_params, ", ")}"}
     end
-  end
-
-  defp build_url(location, params) do
-    URI.parse(location)
-    |> URI.append_query(URI.encode_query(params))
-    |> URI.to_string()
   end
 end

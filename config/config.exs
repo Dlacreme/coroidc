@@ -1,10 +1,9 @@
 import Config
 
-# You must implement and define the following behaviours.
-config :oidc_core, OIDCCore.Server,
-  error_page_url: "/oidc/error",
-  authentication_form_url: "/oidc/login"
+# You must implement OIDCCore.Server behaviour
+# and define the module used here.
+config :oidc_core, OIDCCore.Server, OIDCCore.Server.Placeholder
 
 if config_env() == :test do
-  import_config "test.exs"
+  config :oidc_core, OIDCCore.Server, OIDCCoreTest.Server
 end
