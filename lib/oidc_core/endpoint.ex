@@ -1,5 +1,6 @@
-defmodule OIDCCoreWeb do
+defmodule OIDCCore.Endpoint do
   @moduledoc """
+  This module define all the plugs.
   """
 
   defmacro __using__(_opts \\ []) do
