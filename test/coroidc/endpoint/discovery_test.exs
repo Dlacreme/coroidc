@@ -1,6 +1,6 @@
-defmodule OIDCCore.Endpoint.DiscoveryTest do
-  use OIDCCoreTest.ConnCase
-  alias OIDCCore.Endpoint.Discovery
+defmodule Coroidc.Endpoint.DiscoveryTest do
+  use CoroidcTest.ConnCase
+  alias Coroidc.Endpoint.Discovery
 
   describe "call/2" do
     test "returns a valid openid configuration" do

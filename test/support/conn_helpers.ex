@@ -1,4 +1,4 @@
-defmodule OIDCCoreTest.ConnHelpers do
+defmodule CoroidcTest.ConnHelpers do
   @moduledoc """
   Provider helper to easily introspect a conn
   """

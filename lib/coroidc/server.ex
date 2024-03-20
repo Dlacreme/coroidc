@@ -1,4 +1,4 @@
-defmodule OIDCCore.Server do
+defmodule Coroidc.Server do
   @moduledoc """
   Exposes all the callbacks & function to implement
   """

@@ -1,5 +1,5 @@
-defmodule OIDCCore.Endpoint.Discovery do
-  use OIDCCore.Endpoint
+defmodule Coroidc.Endpoint.Discovery do
+  use Coroidc.Endpoint
 
   def init(opts \\ []) do
     opts

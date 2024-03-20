@@ -1,9 +1,9 @@
 import Config
 
-# You must implement OIDCCore.Server behaviour
+# You must implement Coroidc.Server behaviour
 # and define the module used here.
-config :oidc_core, OIDCCore.Server, OIDCCore.Server.Placeholder
+config :coroidc, Coroidc.Server, Coroidc.Server.Placeholder
 
 if config_env() == :test do
-  config :oidc_core, OIDCCore.Server, OIDCCoreTest.Server
+  config :coroidc, Coroidc.Server, CoroidcTest.Server
 end

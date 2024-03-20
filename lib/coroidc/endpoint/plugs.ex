@@ -1,4 +1,4 @@
-defmodule OIDCCore.Endpoint.Plugs do
+defmodule Coroidc.Endpoint.Plugs do
   @moduledoc """
   Define plugs used in different endpoints.
   """

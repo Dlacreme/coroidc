@@ -1,11 +1,11 @@
-defmodule OIDCCore.Endpoint.Authorization do
+defmodule Coroidc.Endpoint.Authorization do
   @moduledoc """
   The authorization module check the OIDC parameters
   and if everything is correct gives back the hand to the
   host application to authenticate the user.
   """
-  use OIDCCore.Endpoint
-  alias OIDCCore.Server.Callback, as: ServerCallback
+  use Coroidc.Endpoint
+  alias Coroidc.Server.Callback, as: ServerCallback
 
   def init(opts \\ []) do
     opts

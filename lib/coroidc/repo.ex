@@ -1,4 +1,4 @@
-defmodule OIDCCore.Repo do
+defmodule Coroidc.Repo do
   @moduledoc """
   """
 end

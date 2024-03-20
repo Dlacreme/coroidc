@@ -1,4 +1,4 @@
-defmodule OIDCCoreTest.ConnCase do
+defmodule CoroidcTest.ConnCase do
   use ExUnit.CaseTemplate
 
   using do
@@ -6,7 +6,7 @@ defmodule OIDCCoreTest.ConnCase do
       # Import conveniences for testing with connections
       use Plug.Test
       import Plug.Conn
-      import OIDCCoreTest.ConnHelpers
+      import CoroidcTest.ConnHelpers
     end
   end
 end

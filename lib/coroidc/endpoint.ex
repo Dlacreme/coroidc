@@ -1,4 +1,4 @@
-defmodule OIDCCore.Endpoint do
+defmodule Coroidc.Endpoint do
   @moduledoc """
   This module define all the plugs.
   """
@@ -7,7 +7,7 @@ defmodule OIDCCore.Endpoint do
     quote do
       use Plug.Builder
       import Plug.Conn
-      import OIDCCore.Endpoint.Helpers
+      import Coroidc.Endpoint.Helpers
     end
   end
 end

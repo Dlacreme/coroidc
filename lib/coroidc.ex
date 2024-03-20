@@ -1,4 +1,4 @@
-defmodule OIDCCore do
+defmodule Coroidc do
   @moduledoc """
   """
 

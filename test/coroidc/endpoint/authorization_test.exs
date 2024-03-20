@@ -1,6 +1,6 @@
-defmodule OIDCCore.Endpoint.AuthorizationTest do
-  use OIDCCoreTest.ConnCase
-  alias OIDCCore.Endpoint.Authorization
+defmodule Coroidc.Endpoint.AuthorizationTest do
+  use CoroidcTest.ConnCase
+  alias Coroidc.Endpoint.Authorization
 
   describe "call" do
     test "redirect to the login url" do

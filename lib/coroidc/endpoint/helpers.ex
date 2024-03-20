@@ -1,4 +1,4 @@
-defmodule OIDCCore.Endpoint.Helpers do
+defmodule Coroidc.Endpoint.Helpers do
   import Plug.Conn
 
   def redirect_to(conn, url) do
