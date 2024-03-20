@@ -3,12 +3,12 @@ defmodule CoroidcTest.Server do
 
   @impl Coroidc.Server
   def redirect_to_authentication(_conn, _opts) do
-    {:ok, :redirect_to_authentication}
+    {:callback, :redirect_to_authentication, []}
   end
 
   @impl Coroidc.Server
-  def handle_error(_conn, _error, _opts) do
-    {:ok, :handle_error}
+  def handle_error(_conn, error, opts) do
+    {:callback, :handle_error, Keyword.put_new(opts, :message, error)}
   end
 
   @impl Coroidc.Server

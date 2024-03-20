@@ -15,7 +15,7 @@ defmodule Coroidc.Server do
   Handle an error where 'error' is a meaningful error
 
   opts may contain the following:
-  - http_code: meaningful HTTP code
+  - status: meaningful HTTP code
   """
   @callback handle_error(conn :: Plug.Conn.t(), error :: binary(), opts :: Keyword.t()) ::
               Plug.Conn.t()

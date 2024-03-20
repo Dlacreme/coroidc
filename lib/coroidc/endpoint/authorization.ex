@@ -14,19 +14,25 @@ defmodule Coroidc.Endpoint.Authorization do
   def call(conn, _opts) do
     with {:ok, conn} <- validate_oidc_parameters(conn) do
       ServerCallback.redirect_to_authentication(conn)
+    else
+      {:error, reason, status} ->
+        ServerCallback.handle_error(conn, reason, status: status)
     end
   end
 
-  def authorize(conn, user_id) do
+  def authorize(conn, user_id, opts \\ []) do
     with :ok <- validate_user_id(user_id),
          {:ok, conn} <- validate_oidc_parameters(conn) do
       case Map.fetch!(conn.query_params, "response_type") do
         "code" ->
-          authorize_with_code(conn, user_id)
+          authorize_with_code(conn, user_id, opts)
 
         "jwt" ->
           raise "JWT response_type not implemented"
       end
+    else
+      {:error, reason, status} ->
+        ServerCallback.handle_error(conn, reason, status: status)
     end
   end
 
@@ -94,16 +100,14 @@ defmodule Coroidc.Endpoint.Authorization do
     end
   end
 
-  defp authorize_with_code(conn, user_id) do
-    code =
-      :crypto.strong_rand_bytes(20)
-      |> Base.url_encode64(padding: false)
+  defp authorize_with_code(conn, user_id, opts) do
+    code = Keyword.get(opts, :code, Base.url_encode64(:crypto.strong_rand_bytes(20)))
 
     default_expire_at = DateTime.utc_now() |> DateTime.add(3600, :second)
 
     case ServerCallback.insert_code(user_id, code, default_expire_at: default_expire_at) do
       :ok -> redirect_to_client(conn, code)
-      {:error, reason} -> ServerCallback.handle_error(conn, reason, http_code: 500)
+      {:error, reason} -> ServerCallback.handle_error(conn, reason, status: 500)
     end
   end
 

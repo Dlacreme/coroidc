@@ -19,7 +19,7 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
     test "call Coroidc.Server#redirect_to_authentication callback", %{valid_params: params} do
       conn = conn(:get, authorization_url(params))
 
-      assert {:ok, :redirect_to_authentication} == Authorization.call(conn, [])
+      assert {:callback, :redirect_to_authentication, []} == Authorization.call(conn, [])
     end
   end
 
@@ -35,9 +35,17 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
       assert conn.status == 302
 
       assert Regex.match?(
-               ~r{/callback\?code=[A-Za-z0-9_-]+&state=itsastate&nonce=itsanonce},
+               ~r{/callback\?code=([A-Za-z0-9_-]|%[0-9A-Fa-f])+&state=itsastate&nonce=itsanonce},
                location
              )
+    end
+
+    test "return an error if fail to insert code", %{valid_params: params} do
+      conn =
+        conn(:get, authorization_url(params))
+
+      assert {:callback, :handle_error, [message: "db not available", status: 500]} ==
+               Authorization.authorize(conn, "11111", code: "error")
     end
   end
 
@@ -45,8 +53,13 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
     test "when oidc parameters are missing" do
       conn = conn(:get, authorization_url(%{}))
 
-      assert {:error, "Missing parameters: client_id, redirect_uri, response_type, scope", 400} ==
-               Authorization.call(conn, [])
+      assert {:callback, :handle_error,
+              [
+                message: "Missing parameters: client_id, redirect_uri, response_type, scope",
+                status: 400
+              ]}
+
+      Authorization.call(conn, [])
     end
 
     test "when response_type is invalid", %{valid_params: params} do
@@ -58,7 +71,7 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
           authorization_url(params)
         )
 
-      assert {:error, "invalid response_type", 400} ==
+      assert {:callback, :handle_error, [message: "invalid response_type", status: 400]} ==
                Authorization.call(conn, [])
     end
 
@@ -66,7 +79,7 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
       params = Map.put(params, "client_id", "unknown")
       conn = conn(:get, authorization_url(params))
 
-      assert {:error, "invalid client_id", 400} ==
+      assert {:callback, :handle_error, [message: "invalid client_id", status: 400]} ==
                Authorization.call(conn, [])
     end
 
@@ -74,7 +87,7 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
       params = Map.put(params, "redirect_uri", "/")
       conn = conn(:get, authorization_url(params))
 
-      assert {:error, "invalid redirect_uri", 400} ==
+      assert {:callback, :handle_error, [message: "invalid redirect_uri", status: 400]} ==
                Authorization.call(conn, [])
     end
   end
