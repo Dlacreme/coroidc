@@ -3,8 +3,7 @@ defmodule Coroidc do
   """
 
   @doc """
-  Finalize the authorization and create a session for the
-  user.
+  Finalize the authorization for a given user
   """
   def authorize(conn, user_id) do
     Coroidc.Endpoint.Authorization.authorize(conn, user_id)
