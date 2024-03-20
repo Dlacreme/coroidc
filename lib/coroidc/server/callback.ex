@@ -16,7 +16,12 @@ defmodule Coroidc.Server.Callback do
   end
 
   @impl Coroidc.Server
-  def get_client(client_id) do
-    @server.get_client(client_id)
+  def get_client(client_id, opts \\ []) do
+    @server.get_client(client_id, opts)
+  end
+
+  @impl Coroidc.Server
+  def insert_code(user_id, code, opts) do
+    @server.insert_code(user_id, code, opts)
   end
 end

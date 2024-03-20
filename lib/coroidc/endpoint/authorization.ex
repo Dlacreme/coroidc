@@ -22,7 +22,10 @@ defmodule Coroidc.Endpoint.Authorization do
          {:ok, conn} <- validate_oidc_parameters(conn) do
       case Map.fetch!(conn.query_params, "response_type") do
         "code" ->
-          nil
+          authorize_with_code(conn, user_id)
+
+        "jwt" ->
+          raise "JWT response_type not implemented"
       end
     end
   end
@@ -89,5 +92,38 @@ defmodule Coroidc.Endpoint.Authorization do
     else
       {:error, "invalid user id", 500}
     end
+  end
+
+  defp authorize_with_code(conn, user_id) do
+    code =
+      :crypto.strong_rand_bytes(20)
+      |> Base.url_encode64(padding: false)
+
+    default_expire_at = DateTime.utc_now() |> DateTime.add(3600, :second)
+
+    case ServerCallback.insert_code(user_id, code, default_expire_at: default_expire_at) do
+      :ok -> redirect_to_client(conn, code)
+      {:error, reason} -> ServerCallback.handle_error(conn, reason, http_code: 500)
+    end
+  end
+
+  defp redirect_to_client(conn, code) do
+    redirect_uri = Map.fetch!(conn.query_params, "redirect_uri")
+
+    params = %{
+      code: code,
+      state: Map.get(conn.query_params, "state", nil),
+      nonce: Map.get(conn.query_params, "nonce", nil)
+    }
+
+    redirect_to(conn, build_redirect_url(redirect_uri, params))
+  end
+
+  defp build_redirect_url(redirect_uri, params) do
+    query = URI.encode_query(params)
+
+    URI.parse(redirect_uri)
+    |> URI.append_query(query)
+    |> URI.to_string()
   end
 end

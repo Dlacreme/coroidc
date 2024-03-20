@@ -24,6 +24,14 @@ defmodule Coroidc.Server do
   Retrieve a client as a valid %Coroidc.Client struct
   or nil if missing.
   """
-  @callback get_client(client_id :: binary()) ::
+  @callback get_client(client_id :: binary(), opts :: Keyword.t()) ::
               Coroidc.Client.t() | nil
+
+  @doc """
+  Register a code
+
+  opts contains a default expirate_at UTC Datetime (1 hour)
+  """
+  @callback insert_code(user_id :: binary(), code :: binary(), opts :: Keyword.t()) ::
+              :ok | {:error, any()}
 end
