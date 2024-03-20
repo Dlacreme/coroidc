@@ -5,6 +5,8 @@ defmodule OIDCCore.Server do
 
   @doc """
   Redirect user to the login/signup form.
+
+  All query parameters MUST BE PERSISTED UNTIL THE END.
   """
   @callback redirect_to_authentication(conn :: Plug.Conn.t(), opts :: Keyword.t()) ::
               Plug.Conn.t()
