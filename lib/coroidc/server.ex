@@ -19,4 +19,11 @@ defmodule Coroidc.Server do
   """
   @callback handle_error(conn :: Plug.Conn.t(), error :: binary(), opts :: Keyword.t()) ::
               Plug.Conn.t()
+
+  @doc """
+  Retrieve a client as a valid %Coroidc.Client struct
+  or nil if missing.
+  """
+  @callback get_client(client_id :: binary()) ::
+              Coroidc.Client.t() | nil
 end

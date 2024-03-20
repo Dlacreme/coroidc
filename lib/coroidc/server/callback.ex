@@ -14,4 +14,9 @@ defmodule Coroidc.Server.Callback do
   def handle_error(conn, error, opts \\ []) do
     @server.handle_error(conn, error, opts)
   end
+
+  @impl Coroidc.Server
+  def get_client(client_id) do
+    @server.get_client(client_id)
+  end
 end

@@ -1,4 +1,5 @@
 defmodule Coroidc.Endpoint.PlugsTest do
+  use CoroidcTest.ConnCase
   alias Coroidc.Endpoint.Plugs
 
   describe "json_content/1" do
