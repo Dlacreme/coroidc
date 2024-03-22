@@ -25,6 +25,12 @@ defmodule Coroidc.Server.Placeholder do
     not_implemented()
   end
 
+  @dialyzer {:no_return, get_code: 2}
+  @impl Coroidc.Server
+  def get_code(_code, _opts) do
+    not_implemented()
+  end
+
   defp not_implemented() do
     raise """
     You must implement Coroidc.Server and define the module in your config file.

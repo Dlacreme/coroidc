@@ -49,7 +49,7 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
     end
   end
 
-  describe "#validate_oidc_parameters/1" do
+  describe "#validate_parameters/1" do
     test "when oidc parameters are missing" do
       conn = conn(:get, authorization_url(%{}))
 

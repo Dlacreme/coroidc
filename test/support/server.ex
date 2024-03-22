@@ -17,8 +17,8 @@ defmodule CoroidcTest.Server do
       nil
     else
       %Coroidc.Client{
-        client_id: client_id,
-        client_secret: client_id <> "-secret",
+        id: client_id,
+        secret: client_id <> "-secret",
         redirect_uris: ["/callback"]
       }
     end
@@ -30,6 +30,15 @@ defmodule CoroidcTest.Server do
       {:error, "db not available"}
     else
       :ok
+    end
+  end
+
+  @impl Coroidc.Server
+  def get_code(code, _opts) do
+    case code do
+      "error" -> :error
+      "redirect_uri" -> {:ok, "redirect_uri"}
+      _any -> :ok
     end
   end
 end

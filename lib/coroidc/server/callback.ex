@@ -24,4 +24,9 @@ defmodule Coroidc.Server.Callback do
   def insert_code(user_id, code, opts) do
     @server.insert_code(user_id, code, opts)
   end
+
+  @impl Coroidc.Server
+  def get_code(code, opts \\ []) do
+    @server.get_code(code, opts)
+  end
 end
