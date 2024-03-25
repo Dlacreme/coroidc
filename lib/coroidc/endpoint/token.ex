@@ -26,7 +26,7 @@ defmodule Coroidc.Endpoint.Token do
     end
   end
 
-  defp authorization_code(conn) do
+  defp authorization_code(_conn) do
   end
 
   defp validate_params(conn) do
