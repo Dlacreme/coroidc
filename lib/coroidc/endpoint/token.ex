@@ -15,11 +15,18 @@ defmodule Coroidc.Endpoint.Token do
   end
 
   def call(conn, _opts) do
-    with {:ok, conn} <- validate_params(conn) do
+    with {:ok, conn} <- validate_params(conn),
+         conn <- disable_cache(conn) do
+      case Map.fetch!(conn.body_params, "grant_type") do
+        "authorization_code" -> authorization_code(conn)
+      end
     else
       {:error, reason, status} ->
         ServerCallback.handle_error(conn, reason, status: status)
     end
+  end
+
+  defp authorization_code(conn) do
   end
 
   defp validate_params(conn) do

@@ -41,7 +41,7 @@ defmodule Coroidc.Endpoint.TokenTest do
 
       assert {:callback, :handle_error,
               [
-                message: "Missing parameters: client_id, client_secret, code, grant_type",
+                message: "Missing parameters: client_id, code, grant_type",
                 status: 400
               ]} ==
                Token.call(conn, [])

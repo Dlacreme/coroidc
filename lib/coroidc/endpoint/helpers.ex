@@ -1,6 +1,6 @@
 defmodule Coroidc.Endpoint.Helpers do
   import Plug.Conn
-  alias Coroidc.Server.Callback, as: ServerCallback
+  alias Coroidc.Server, as: ServerCallback
 
   def redirect_to(conn, url) do
     conn
@@ -43,5 +43,13 @@ defmodule Coroidc.Endpoint.Helpers do
       nil -> default
       {_k, value} -> value
     end
+  end
+
+  @doc """
+  Secret response should have cache disabled
+  """
+  def disable_cache(conn) do
+    conn
+    |> put_resp_header("cache-control", "no-store")
   end
 end

@@ -10,7 +10,7 @@ defmodule Coroidc.Endpoint do
       import Plug.Conn
       import Coroidc.Endpoint.Helpers
 
-      alias Coroidc.Server.Callback, as: ServerCallback
+      alias Coroidc.Server, as: ServerCallback
     end
   end
 end

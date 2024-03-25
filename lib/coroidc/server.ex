@@ -1,50 +1,52 @@
 defmodule Coroidc.Server do
   @moduledoc """
-  Exposes all the callbacks & function to implement
+  This module is the bridge between Coroidc and
+  your own OpenID server. It exposes 2 behaviours
+  that you should properly implement:
+
+  - Coroidc.Server.Handler: this is how Coroidc will
+  give you back the hand when required.
+
+  - Coroidc.Server.Repo: this is how Coroidc will fetch
+  data from your database.
+
+  Once properly implemented and tested, you must edit
+  your config file to let Coroidc knows your module
+  names.
+
+  See Coroidc.ex for more information.
   """
 
-  @doc """
-  Redirect user to the login/signup form.
+  alias Coroidc.Server.Handler
+  alias Coroidc.Server.Repo
+  @behaviour Handler
+  @behaviour Repo
 
-  All query parameters MUST BE PERSISTED UNTIL THE END.
-  """
-  @callback redirect_to_authentication(conn :: Plug.Conn.t(), opts :: Keyword.t()) ::
-              Plug.Conn.t()
+  @handler Application.compile_env(:coroidc, :handler)
+  @repo Application.compile_env(:coroidc, :repo)
 
-  @doc """
-  Handle an error where 'error' is a meaningful error
+  @impl Handler
+  def redirect_to_authentication(conn, opts \\ []) do
+    @handler.redirect_to_authentication(conn, opts)
+  end
 
-  opts may contain the following:
-  - status: meaningful HTTP code
-  """
-  @callback handle_error(conn :: Plug.Conn.t(), error :: binary(), opts :: Keyword.t()) ::
-              Plug.Conn.t()
+  @impl Handler
+  def handle_error(conn, error, opts \\ []) do
+    @handler.handle_error(conn, error, opts)
+  end
 
-  @doc """
-  Retrieve a client as a valid %Coroidc.Client struct
-  or nil if missing.
-  """
-  @callback get_client(client_id :: binary(), opts :: Keyword.t()) ::
-              Coroidc.Client.t() | nil
+  @impl Repo
+  def get_client(client_id, opts \\ []) do
+    @repo.get_client(client_id, opts)
+  end
 
-  @doc """
-  Register a code
+  @impl Repo
+  def insert_code(user_id, code, opts) do
+    @repo.insert_code(user_id, code, opts)
+  end
 
-  opts contains:
-  - default_expired_at: a default expirate_at UTC Datetime (1 hour)
-  - redirect_uri: the redirect_uri used by the client. Used to confirm the code in the /token endpoint
-  """
-  @callback insert_code(
-              user_id :: binary(),
-              code :: binary(),
-              opts :: Keyword.t()
-            ) ::
-              :ok | {:error, any()}
-
-  @doc """
-  Retrieve a VALID and NOT EXPIRED code and optionnally the linked redirect_uri
-  If redirect_uri is not provided, it ignore the security check.
-  """
-  @callback get_code(code :: binary(), opts :: Keyword.t()) ::
-              :ok | {:ok, redirect_uri :: binary()} | :error
+  @impl Repo
+  def get_code(code, opts \\ []) do
+    @repo.get_code(code, opts)
+  end
 end
