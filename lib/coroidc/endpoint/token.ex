@@ -15,10 +15,36 @@ defmodule Coroidc.Endpoint.Token do
   end
 
   def call(conn, _opts) do
-    with {:ok, conn} <- validate_params(conn),
-         conn <- disable_cache(conn) do
-      case Map.fetch!(conn.body_params, "grant_type") do
-        "authorization_code" -> authorization_code(conn)
+    conn = disable_cache(conn)
+
+    case Map.get(conn.body_params, "grant_type", nil) do
+      "authorization_code" ->
+        authorization_code(conn)
+
+      nil ->
+        ServerCallback.handle_error(conn, "grant_type is missing", status: 400)
+
+      other ->
+        ServerCallback.handle_error(conn, "grant_type '#{other}' is not supported", status: 400)
+    end
+  end
+
+  defp authorization_code(conn) do
+    with {:ok, conn} <- validate_params(conn, ~w(client_id code grant_type)),
+         {:ok, code} <- get_code_from_params(conn),
+         :ok <- validate_code(conn, code) do
+      case ServerCallback.insert_session_from_code(code) do
+        {:ok, access_token, expires_in} ->
+          :ok
+
+        {:ok, access_token, expires_in, refresh_token} ->
+          :ok
+
+        {:error, reason} ->
+          ServerCallback.handle_error(conn, reason, status: 500)
+
+        _any ->
+          ServerCallback.handle_error(conn, "error while generation access token", status: 500)
       end
     else
       {:error, reason, status} ->
@@ -26,18 +52,13 @@ defmodule Coroidc.Endpoint.Token do
     end
   end
 
-  defp authorization_code(_conn) do
-  end
-
-  defp validate_params(conn) do
+  defp validate_params(conn, required_params) do
     with :ok <- validate_request_method(conn),
          :ok <- validate_content_type(conn),
-         :ok <- validate_required_params(conn.body_params, @required_params),
+         :ok <- validate_required_params(conn.body_params, required_params),
          :ok <- validate_grant_type(conn),
          {:ok, client} <- get_client_from_params(conn.body_params),
-         :ok <- BasicAuth.validate_authorization_header(conn, client),
-         {:ok, code} <- get_code_from_params(conn),
-         :ok <- validate_code(conn, code) do
+         :ok <- BasicAuth.validate_authorization_header(conn, client) do
       {:ok, conn}
     end
   end
@@ -77,7 +98,7 @@ defmodule Coroidc.Endpoint.Token do
   end
 
   defp validate_code(conn, code) do
-    case ServerCallback.get_code(code) do
+    case ServerCallback.validate_code(code) do
       :ok ->
         :ok
 

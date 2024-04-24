@@ -25,9 +25,20 @@ defmodule Coroidc.Server.Repo do
               :ok | {:error, any()}
 
   @doc """
-  Retrieve a VALID and NOT EXPIRED code and optionnally the linked redirect_uri
+  Validate a VALID and NOT EXPIRED code and optionnally returns the
+  linked redirect_uri.
   If redirect_uri is not provided, it ignore the security check.
   """
-  @callback get_code(code :: binary(), opts :: Keyword.t()) ::
+  @callback validate_code(code :: binary(), opts :: Keyword.t()) ::
               :ok | {:ok, redirect_uri :: binary()} | :error
+
+  @doc """
+  Create a new session using a code and returns an access_token along with
+  the `expires_in` (in seconds).
+  Optionnaly, you can also provide a refresh_token.
+  """
+  @callback insert_session_from_code(code :: binary(), opts :: Keyword.t()) ::
+              {:ok, access_token :: binary(), expires_in :: number()}
+              | {:ok, access_token :: binary(), expires_in :: number(), refresh_token :: binary()}
+              | {:error, any()}
 end

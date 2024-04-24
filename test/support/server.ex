@@ -27,7 +27,15 @@ defmodule CoroidcTest.Server do
   end
 
   @impl Coroidc.Server.Repo
-  def get_code(_code, _opts) do
+  def validate_code(_code, _opts) do
     :ok
+  end
+
+  def insert_session_from_code(code, opts) do
+    case code do
+      "error" -> {:error, "unknown error"}
+      "refresh_token" -> {:ok, "access_token", 123, "refresh_token"}
+      _any -> {:ok, "access_token", 123}
+    end
   end
 end

@@ -1,6 +1,6 @@
 import Config
 
 config :coroidc,
-  issuer: "https://test.coroidc.com",
+  issuer: "https://dev.coroidc.com",
   handler: CoroidcDev.Server,
   repo: CoroidcDev.Server

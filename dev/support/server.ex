@@ -35,11 +35,20 @@ defmodule CoroidcDev.Server do
   end
 
   @impl Coroidc.Server.Repo
-  def get_code(code, _opts) do
+  def validate_code(code, _opts) do
     case code do
       "error" -> :error
       "redirect_uri" -> {:ok, "redirect_uri"}
       _any -> :ok
+    end
+  end
+
+  @impl Coroidc.Server.Repo
+  def insert_session_from_code(code, _opts) do
+    case code do
+      "error" -> {:error, "unknown error"}
+      "refresh_token" -> {:ok, "access_token", 123, "refresh_token"}
+      _any -> {:ok, "access_token", 123}
     end
   end
 end

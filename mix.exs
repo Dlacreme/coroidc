@@ -28,7 +28,8 @@ defmodule Coroidc.MixProject do
   defp deps do
     [
       {:plug, "~> 1.15"},
-      {:jason, "~> 1.4"}
+      {:jason, "~> 1.4"},
+      {:jose, "~> 1.11"}
     ]
   end
 end
