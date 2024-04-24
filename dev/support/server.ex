@@ -14,41 +14,30 @@ defmodule CoroidcDev.Server do
 
   @impl Coroidc.Server.Repo
   def get_client(client_id, _opts) do
-    if client_id == "unknown" do
-      nil
-    else
-      %Coroidc.Client{
-        id: client_id,
-        secret: client_id <> "-secret",
-        redirect_uris: ["/callback"]
-      }
-    end
+    %Coroidc.Client{
+      id: client_id,
+      secret: client_id <> "-secret",
+      redirect_uris: ["/callback"]
+    }
   end
 
   @impl Coroidc.Server.Repo
   def insert_code(_user_id, code, _opts) do
-    if code == "error" do
-      {:error, "db not available"}
-    else
-      :ok
-    end
+    :ok
   end
 
   @impl Coroidc.Server.Repo
-  def validate_code(code, _opts) do
-    case code do
-      "error" -> :error
-      "redirect_uri" -> {:ok, "redirect_uri"}
-      _any -> :ok
-    end
+  def revoke_code(_code, _opts) do
+    :ok
   end
 
   @impl Coroidc.Server.Repo
-  def insert_session_from_code(code, _opts) do
-    case code do
-      "error" -> {:error, "unknown error"}
-      "refresh_token" -> {:ok, "access_token", 123, "refresh_token"}
-      _any -> {:ok, "access_token", 123}
-    end
+  def get_user_id_from_code(code, _opts) do
+    {:ok, "user_id"}
+  end
+
+  @impl Coroidc.Server.Repo
+  def insert_session(user_id, _opts) do
+    "refresh_token" -> {:ok, "access_token", 123, "refresh_token"}
   end
 end

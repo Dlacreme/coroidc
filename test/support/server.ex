@@ -22,17 +22,29 @@ defmodule CoroidcTest.Server do
   end
 
   @impl Coroidc.Server.Repo
-  def insert_code(_user_id, _code, _opts) do
+  def insert_code(_user_id, code, _opts) do
+    if code == "error" do
+      {:error, "db not available"}
+    else
+      :ok
+    end
+  end
+
+  @impl Coroidc.Server.Repo
+  def revoke_code(_code, _opts) do
     :ok
   end
 
   @impl Coroidc.Server.Repo
-  def validate_code(_code, _opts) do
-    :ok
+  def get_user_id_from_code(code, _opts) do
+    case code do
+      "error" -> :error
+      "redirect_uri" -> {:ok, "user_id"}
+    end
   end
 
-  def insert_session_from_code(code, opts) do
-    case code do
+  def insert_session(user_id, _opts) do
+    case user_id do
       "error" -> {:error, "unknown error"}
       "refresh_token" -> {:ok, "access_token", 123, "refresh_token"}
       _any -> {:ok, "access_token", 123}

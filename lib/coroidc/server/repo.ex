@@ -22,22 +22,37 @@ defmodule Coroidc.Server.Repo do
               code :: binary(),
               opts :: Keyword.t()
             ) ::
-              :ok | {:error, any()}
+              :ok | {:error, reason :: binary()}
+
+  @doc """
+  Revoke a code - it shouldn't fail if the code is already revoked
+
+  The returned value is ignoed.
+  """
+  @callback revoke_code(code :: binary(), opts :: Keyword.t()) :: any()
 
   @doc """
   Validate a VALID and NOT EXPIRED code and optionnally returns the
   linked redirect_uri.
   If redirect_uri is not provided, it ignore the security check.
   """
-  @callback validate_code(code :: binary(), opts :: Keyword.t()) ::
-              :ok | {:ok, redirect_uri :: binary()} | :error
+  @callback get_user_id_from_code(code :: binary(), opts :: Keyword.t()) ::
+              {:ok, user_id :: binary()}
+              | {:ok, user_id :: binary() :: redirect_uri :: binary()}
+              | {:error, reason :: binary()}
+              | :error
 
   @doc """
   Create a new session using a code and returns an access_token along with
   the `expires_in` (in seconds).
   Optionnaly, you can also provide a refresh_token.
+
+  Opts contains the following information about the authentication:
+  - code: code used
+  - ip: initial IP of the user
+  - user_agent: user agent of the user
   """
-  @callback insert_session_from_code(code :: binary(), opts :: Keyword.t()) ::
+  @callback insert_session(user_id :: binary(), opts :: Keyword.t()) ::
               {:ok, access_token :: binary(), expires_in :: number()}
               | {:ok, access_token :: binary(), expires_in :: number(), refresh_token :: binary()}
               | {:error, any()}

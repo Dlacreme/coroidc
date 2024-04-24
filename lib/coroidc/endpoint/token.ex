@@ -32,8 +32,9 @@ defmodule Coroidc.Endpoint.Token do
   defp authorization_code(conn) do
     with {:ok, conn} <- validate_params(conn, ~w(client_id code grant_type)),
          {:ok, code} <- get_code_from_params(conn),
-         :ok <- validate_code(conn, code) do
-      case ServerCallback.insert_session_from_code(code) do
+         {:ok, user_id} <- use_code(conn, code),
+         ServerCallback.revoke_code(code) do
+      case ServerCallback.insert_session(user_id, code: code) do
         {:ok, access_token, expires_in} ->
           :ok
 
@@ -42,9 +43,6 @@ defmodule Coroidc.Endpoint.Token do
 
         {:error, reason} ->
           ServerCallback.handle_error(conn, reason, status: 500)
-
-        _any ->
-          ServerCallback.handle_error(conn, "error while generation access token", status: 500)
       end
     else
       {:error, reason, status} ->
@@ -97,20 +95,22 @@ defmodule Coroidc.Endpoint.Token do
     {:ok, code}
   end
 
-  defp validate_code(conn, code) do
-    case ServerCallback.validate_code(code) do
-      :ok ->
-        :ok
+  defp use_code(conn, code) do
+    case ServerCallback.get_user_id_from_code(code) do
+      {:ok, user_id} ->
+        {:ok, user_id}
 
-      {:ok, authorized_redirect_uri} ->
-        validate_redirect_uri(conn, authorized_redirect_uri)
+      {:ok, user_id, authorized_redirect_uri} ->
+        with :ok <- valid_redirect_uri?(conn, authorized_redirect_uri) do
+          {:ok, user_id}
+        end
 
       _any ->
         {:error, "invalid code", 400}
     end
   end
 
-  defp validate_redirect_uri(conn, authorized_redirect_uri) do
+  defp valid_redirect_uri?(conn, authorized_redirect_uri) do
     with {:ok, redirect_uri} <- Map.fetch(conn.body_params, "redirect_uri"),
          true <- redirect_uri == authorized_redirect_uri do
       :ok
