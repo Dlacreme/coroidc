@@ -59,13 +59,25 @@ defmodule Coroidc.Server do
 
   @dialyzer {:nowarn_function, insert_code: 3}
   @impl Repo
-  def insert_code(user_id, code, opts) do
+  def insert_code(user_id, code, opts \\ []) do
     @repo.insert_code(user_id, code, opts)
   end
 
-  @dialyzer {:nowarn_function, get_code: 2}
+  @dialyzer {:nowarn_function, revoke_code: 2}
   @impl Repo
-  def get_code(code, opts \\ []) do
-    @repo.get_code(code, opts)
+  def revoke_code(code, opts \\ []) do
+    @repo.revoke_code(code, opts)
+  end
+
+  @dialyzer {:nowarn_function, get_user_id_from_code: 2}
+  @impl Repo
+  def get_user_id_from_code(code, opts \\ []) do
+    @repo.get_user_id_from_code(code, opts)
+  end
+
+  @dialyzer {:nowarn_function, insert_session: 2}
+  @impl Repo
+  def insert_session(user_id, opts \\ []) do
+    @repo.insert_session(user_id, opts)
   end
 end
