@@ -8,8 +8,6 @@ defmodule Coroidc.Endpoint.Token do
     json_decoder: Jason
   )
 
-  @required_params ~w(client_id code grant_type)
-
   def init(opts \\ []) do
     opts
   end
@@ -34,7 +32,7 @@ defmodule Coroidc.Endpoint.Token do
          {:ok, code} <- get_code_from_params(conn),
          {:ok, user_id} <- use_code(conn, code),
          ServerCallback.revoke_code(code) do
-      case ServerCallback.insert_session(user_id, code: code) do
+      case ServerCallback.insert_session(user_id, code: code, ip: conn.remote_ip) do
         {:ok, access_token, expires_in} ->
           :ok
 

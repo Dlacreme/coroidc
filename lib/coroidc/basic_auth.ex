@@ -26,7 +26,7 @@ defmodule Coroidc.BasicAuth do
   end
 
   defp test_credentials(cred, client) do
-    with {:ok, decoded_cred} <- Base.decode64(cred, padding: false) |> IO.inspect(),
+    with {:ok, decoded_cred} <- Base.decode64(cred, padding: false),
          [id, secret] <- String.split(decoded_cred, ":"),
          true <- id == client.id,
          true <- secret == client.secret do

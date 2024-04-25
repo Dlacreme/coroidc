@@ -38,7 +38,7 @@ defmodule Coroidc.Server.Repo do
   """
   @callback get_user_id_from_code(code :: binary(), opts :: Keyword.t()) ::
               {:ok, user_id :: binary()}
-              | {:ok, user_id :: binary() :: redirect_uri :: binary()}
+              | {:ok, user_id :: binary(), redirect_uri :: binary()}
               | {:error, reason :: binary()}
               | :error
 

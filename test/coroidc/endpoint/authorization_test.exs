@@ -17,7 +17,8 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
 
   describe "call/2" do
     test "call Coroidc.Server#redirect_to_authentication callback", %{valid_params: params} do
-      conn = conn(:get, authorization_url(params))
+      conn =
+        conn(:get, authorization_url(params))
 
       assert {:callback, :redirect_to_authentication, []} == Authorization.call(conn, [])
     end

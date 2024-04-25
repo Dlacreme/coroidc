@@ -41,7 +41,7 @@ defmodule Coroidc.Endpoint.TokenTest do
 
       assert {:callback, :handle_error,
               [
-                message: "Missing parameters: client_id, code, grant_type",
+                message: "grant_type is missing",
                 status: 400
               ]} ==
                Token.call(conn, [])
@@ -53,7 +53,7 @@ defmodule Coroidc.Endpoint.TokenTest do
 
       assert {:callback, :handle_error,
               [
-                message: "invalid grant_type",
+                message: "grant_type 'none' is not supported",
                 status: 400
               ]} == Token.call(conn, [])
     end
