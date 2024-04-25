@@ -28,7 +28,7 @@ defmodule Coroidc.Endpoint.Token do
   end
 
   defp authorization_code(conn) do
-    with {:ok, conn} <- validate_params(conn, ~w(client_id code grant_type)),
+    with {:ok, conn} <- validate_params(conn, ~w(client_id code)),
          {:ok, code} <- get_code_from_params(conn),
          {:ok, user_id} <- use_code(conn, code),
          ServerCallback.revoke_code(code) do

@@ -13,7 +13,7 @@ defmodule Coroidc.Endpoint.TokenTest do
     {:ok, %{valid_params: params}}
   end
 
-  describe "call/2" do
+  describe "call/2 for authorization_code" do
     test "trade a code for token", %{valid_params: params} do
       conn =
         token_conn(params)
@@ -37,14 +37,24 @@ defmodule Coroidc.Endpoint.TokenTest do
     end
 
     test "it validate the required_params" do
+      conn = token_conn(%{"grant_type" => "authorization_code"})
+
+      assert {:callback, :handle_error,
+              [
+                message: "Missing parameters: client_id, code",
+                status: 400
+              ]} ==
+               Token.call(conn, [])
+    end
+
+    test "it validate that grant_type is provided", %{valid_params: params} do
       conn = token_conn(%{})
 
       assert {:callback, :handle_error,
               [
                 message: "grant_type is missing",
                 status: 400
-              ]} ==
-               Token.call(conn, [])
+              ]} == Token.call(conn, [])
     end
 
     test "it validate the grant_type", %{valid_params: params} do
