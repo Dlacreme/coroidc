@@ -14,7 +14,7 @@ defmodule Coroidc.Server.Repo do
   Register a new code
   """
   @callback insert_code(code :: Coroidc.Code.t()) ::
-              :ok | {:error, reason :: binary()}
+              {:ok, Coroidc.Code.t()} | {:error, reason :: binary()}
 
   @doc """
   Consume a code to return it's meta data

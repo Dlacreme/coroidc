@@ -30,7 +30,7 @@ defmodule CoroidcTest.Server do
     if code.code == "error" do
       {:error, "db not available"}
     else
-      code
+      {:ok, code}
     end
   end
 

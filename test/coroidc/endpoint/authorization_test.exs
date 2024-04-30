@@ -24,7 +24,7 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
     end
   end
 
-  describe "authorize/2" do
+  describe "authorize/3" do
     test "redirect with a valid code & state + nonce", %{valid_params: params} do
       conn =
         conn(:get, authorization_url(params))

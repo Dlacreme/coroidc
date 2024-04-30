@@ -4,12 +4,12 @@ defmodule Coroidc.IdToken do
 
   @issuer Application.compile_env(:coroidc, :issuer)
 
-  def generate(client_id, user_id, expires_in, nonce \\ nil) do
+  def generate(code) when is_struct(code, Coroidc.Code) do
     header = header()
 
     claims =
-      claims(client_id, user_id, expires_in)
-      |> maybe_add_nonce(nonce)
+      claims(code)
+      |> maybe_add_nonce(code.nonce)
 
     JOSE.JWT.sign(header, %{"k" => "your_secret_key"}, claims)
     |> JOSE.JWS.compact()
@@ -22,13 +22,13 @@ defmodule Coroidc.IdToken do
     }
   end
 
-  defp claims(client_id, user_id, expires_in) do
+  defp claims(code) do
     %{
       "isser" => @issuer,
-      "sub" => user_id,
-      "aud" => client_id,
-      "iat" => DateTime.utc_now() |> DateTime.to_unix(),
-      "exp" => DateTime.utc_now() |> DateTime.add(expires_in) |> DateTime.to_unix()
+      "sub" => code.user_id,
+      "aud" => code.client_id,
+      "iat" => code.issued_at |> DateTime.to_unix(),
+      "exp" => code.issued_at |> DateTime.add(code.expires_in) |> DateTime.to_unix()
     }
   end
 

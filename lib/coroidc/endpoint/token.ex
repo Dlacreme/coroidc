@@ -2,6 +2,8 @@ defmodule Coroidc.Endpoint.Token do
   use Coroidc.Endpoint
 
   alias Coroidc.BasicAuth
+  alias Coroidc.Code
+  alias Coroidc.AccessToken
 
   plug(Plug.Parsers,
     parsers: [:urlencoded, :json],
@@ -30,18 +32,11 @@ defmodule Coroidc.Endpoint.Token do
   defp authorization_code(conn) do
     with {:ok, conn} <- validate_params(conn, ~w(client_id code)),
          {:ok, code} <- get_code_from_params(conn),
-         {:ok, user_id} <- use_code(conn, code),
-         ServerCallback.revoke_code(code) do
-      case ServerCallback.insert_session(user_id, code: code, ip: conn.remote_ip) do
-        {:ok, access_token, expires_in} ->
-          send_access_token(conn, %{access_token: access_token, expires_in: expires_in})
-
-        {:ok, access_token, expires_in, refresh_token} ->
-          send_access_token(conn, %{
-            access_token: access_token,
-            expires_in: expires_in,
-            refresh_token: refresh_token
-          })
+         {:ok, code} <- consume_code(conn, code),
+         {:ok, %AccessToken{} = access_token} <- create_access_token(code) do
+      case ServerCallback.insert_access_token(access_token) do
+        {:ok, access_token} ->
+          IO.inspect(access_token)
 
         {:error, reason} ->
           ServerCallback.handle_error(conn, reason, status: 500)
@@ -97,14 +92,14 @@ defmodule Coroidc.Endpoint.Token do
     {:ok, code}
   end
 
-  defp use_code(conn, code) do
-    case ServerCallback.get_user_id_from_code(code) do
-      {:ok, user_id} ->
-        {:ok, user_id}
+  defp consume_code(conn, code) do
+    case ServerCallback.consume_code(code) do
+      {:ok, %Code{redirect_uri: nil} = code} ->
+        {:ok, code}
 
-      {:ok, user_id, authorized_redirect_uri} ->
+      {:ok, %Code{redirect_uri: authorized_redirect_uri} = code} ->
         with :ok <- valid_redirect_uri?(conn, authorized_redirect_uri) do
-          {:ok, user_id}
+          {:ok, code}
         end
 
       _any ->
@@ -121,8 +116,12 @@ defmodule Coroidc.Endpoint.Token do
     end
   end
 
-  defp send_access_token(conn, initial_payload) do
-    initial_payload
-    |> Map.merge(%{token_type: "Bearer", id_token: Coroidc.IdToken.generate()})
+  defp create_access_token(code) when is_struct(code, Coroidc.Code) do
+    info = Map.take(code, [:client_id, :user_id, :scope])
+
+    %AccessToken{}
+    |> Map.merge(info)
+    |> AccessToken.with_refresh_token?()
+    |> AccessToken.generate_id_token()
   end
 end

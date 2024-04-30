@@ -51,33 +51,27 @@ defmodule Coroidc.Server do
     @handler.handle_error(conn, error, opts)
   end
 
-  @dialyzer {:nowarn_function, get_client: 2}
+  @dialyzer {:nowarn_function, get_client: 1}
   @impl Repo
-  def get_client(client_id, opts \\ []) do
-    @repo.get_client(client_id, opts)
+  def get_client(client_id) do
+    @repo.get_client(client_id)
   end
 
-  @dialyzer {:nowarn_function, insert_code: 3}
+  @dialyzer {:nowarn_function, insert_code: 1}
   @impl Repo
-  def insert_code(user_id, code, opts \\ []) do
-    @repo.insert_code(user_id, code, opts)
+  def insert_code(code) do
+    @repo.insert_code(code)
   end
 
-  @dialyzer {:nowarn_function, revoke_code: 2}
+  @dialyzer {:nowarn_function, consume_code: 1}
   @impl Repo
-  def revoke_code(code, opts \\ []) do
-    @repo.revoke_code(code, opts)
+  def consume_code(code) do
+    @repo.consume_code(code)
   end
 
-  @dialyzer {:nowarn_function, get_user_id_from_code: 2}
+  @dialyzer {:nowarn_function, insert_access_token: 1}
   @impl Repo
-  def get_user_id_from_code(code, opts \\ []) do
-    @repo.get_user_id_from_code(code, opts)
-  end
-
-  @dialyzer {:nowarn_function, insert_session: 2}
-  @impl Repo
-  def insert_session(user_id, opts \\ []) do
-    @repo.insert_session(user_id, opts)
+  def insert_access_token(code) do
+    @repo.insert_access_token(code)
   end
 end

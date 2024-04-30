@@ -104,8 +104,8 @@ defmodule Coroidc.Endpoint.Authorization do
     }
 
     case ServerCallback.insert_code(code) do
-      :ok -> redirect_to_client(conn, code.code)
-      {:error, reason} -> {:error, reason, 500}
+      {:ok, code} -> redirect_to_client(conn, code.code)
+      {:error, reason} -> ServerCallback.handle_error(conn, reason, status: 500)
     end
   end
 
