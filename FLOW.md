@@ -20,9 +20,7 @@ sequenceDiagram
     User->>Coroidc: POST /token
     Coroidc-->>Server: [DB SELECT] Consume code
     Server-->>Coroidc: OK %Code{}
-    Coroidc-->>Server: [DB UPSERT] %Session{user_id, expiration}
-    Server-->>Coroidc: OK %Session{}
-    Coroidc-->>Server: [DB INSERT] %AccessToken{}
+    Coroidc-->>Server: [DB INSERT] %AccessToken{user_id, client_id, scope, expiration, refresh_token?}
     Server-->>Coroidc: OK %AccessToken{token, session_id, refresh_token?, expiration}
     Coroidc->>User: JSON{access_token, refresh_token?, expires_in, id_token}
 ```

@@ -13,7 +13,7 @@ defmodule CoroidcTest.Server do
   end
 
   @impl Coroidc.Server.Repo
-  def get_client(client_id, _opts) do
+  def get_client(client_id) do
     if client_id == "unknown" do
       nil
     else
@@ -26,34 +26,28 @@ defmodule CoroidcTest.Server do
   end
 
   @impl Coroidc.Server.Repo
-  def insert_code(_user_id, code, _opts) do
-    if code == "error" do
+  def insert_code(code) do
+    if code.code == "error" do
       {:error, "db not available"}
     else
-      :ok
+      code
     end
   end
 
   @impl Coroidc.Server.Repo
-  def revoke_code(_code, _opts) do
-    :ok
-  end
-
-  @impl Coroidc.Server.Repo
-  def get_user_id_from_code(code, _opts) do
+  def consume_code(code) do
     case code do
-      "error" -> :error
-      "redirect_uri" -> {:ok, "user_id"}
-      _ -> :ok
+      "error" -> {:error, "server error"}
+      "expired" -> {:error, "code expired"}
+      _c -> {:ok, %Coroidc.Code{code: code}}
     end
   end
 
   @impl Coroidc.Server.Repo
-  def insert_session(user_id, _opts) do
-    case user_id do
+  def insert_access_token(access_token) do
+    case access_token.token do
       "error" -> {:error, "unknown error"}
-      "refresh_token" -> {:ok, "access_token", 123, "refresh_token"}
-      _any -> {:ok, "access_token", 123}
+      t -> {:ok, t}
     end
   end
 end

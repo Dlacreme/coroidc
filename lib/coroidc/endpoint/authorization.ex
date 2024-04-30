@@ -5,6 +5,7 @@ defmodule Coroidc.Endpoint.Authorization do
   host application to authenticate the user.
   """
   use Coroidc.Endpoint
+  alias Coroidc.Code
 
   @required_params ~w(client_id redirect_uri response_type scope)
 
@@ -15,22 +16,22 @@ defmodule Coroidc.Endpoint.Authorization do
   def call(conn, _opts) do
     conn = fetch_query_params(conn)
 
-    with {:ok, conn} <- validate_params(conn) do
-      ServerCallback.redirect_to_authentication(conn)
+    with {:ok, conn, client} <- validate_params(conn) do
+      ServerCallback.redirect_to_authentication(conn, client_id: client.id)
     else
       {:error, reason, status} ->
         ServerCallback.handle_error(conn, reason, status: status)
     end
   end
 
-  def authorize(conn, user_id) do
+  def authorize(conn, user_id, opts \\ []) do
     conn = fetch_query_params(conn)
 
     with :ok <- validate_user_id(user_id),
-         {:ok, conn} <- validate_params(conn) do
+         {:ok, conn, client} <- validate_params(conn) do
       case Map.fetch!(conn.query_params, "response_type") do
         "code" ->
-          authorize_with_code(conn, user_id)
+          authorize_with_code(conn, client.id, user_id, opts)
 
         "jwt" ->
           raise "JWT response_type not implemented"
@@ -48,7 +49,7 @@ defmodule Coroidc.Endpoint.Authorization do
            get_client_from_params(conn.query_params),
          :ok <- validate_redirect_uri(conn, client),
          :ok <- validate_scope(conn, client) do
-      {:ok, conn}
+      {:ok, conn, client}
     end
   end
 
@@ -93,17 +94,18 @@ defmodule Coroidc.Endpoint.Authorization do
     end
   end
 
-  defp authorize_with_code(conn, user_id, opts) do
-    code = Keyword.get(opts, :code, Base.url_encode64(:crypto.strong_rand_bytes(20)))
+  defp authorize_with_code(conn, client_id, user_id, opts) do
+    code = %Code{
+      code: Keyword.get(opts, :code, Coroidc.Crypto.encoded_token()),
+      client_id: client_id,
+      user_id: user_id,
+      scope: Map.fetch!(conn.query_params, "scope"),
+      redirect_uri: Map.fetch!(conn.query_params, "redirect_uri")
+    }
 
-    default_expire_at = DateTime.utc_now() |> DateTime.add(3600, :second)
-
-    case ServerCallback.insert_code(user_id, code,
-           default_expired_at: default_expire_at,
-           redirect_uri: Map.fetch!(conn.query_params, "redirect_uri")
-         ) do
-      :ok -> redirect_to_client(conn, code)
-      {:error, reason} -> ServerCallback.handle_error(conn, reason, status: 500)
+    case ServerCallback.insert_code(code) do
+      :ok -> redirect_to_client(conn, code.code)
+      {:error, reason} -> {:error, reason, 500}
     end
   end
 
