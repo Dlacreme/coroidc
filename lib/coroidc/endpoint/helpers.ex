@@ -27,9 +27,14 @@ defmodule Coroidc.Endpoint.Helpers do
     client_id = Map.fetch!(params, "client_id")
 
     case ServerCallback.get_client(client_id) do
-      nil -> {:error, "invalid client_id", 400}
-      %Coroidc.Client{} = client -> {:ok, client}
-      _any -> {:error, "invalid format for client", 500}
+      %Coroidc.Client{available_scopes: [_ | _]} = client ->
+        {:ok, client}
+
+      nil ->
+        {:error, "invalid client_id", 400}
+
+      _any ->
+        {:error, "invalid format for client", 500}
     end
   end
 

@@ -23,14 +23,14 @@ defmodule Coroidc.Endpoint.Authorization do
     end
   end
 
-  def authorize(conn, user_id, opts \\ []) do
+  def authorize(conn, user_id) do
     conn = fetch_query_params(conn)
 
     with :ok <- validate_user_id(user_id),
          {:ok, conn} <- validate_params(conn) do
       case Map.fetch!(conn.query_params, "response_type") do
         "code" ->
-          authorize_with_code(conn, user_id, opts)
+          authorize_with_code(conn, user_id)
 
         "jwt" ->
           raise "JWT response_type not implemented"
@@ -44,8 +44,10 @@ defmodule Coroidc.Endpoint.Authorization do
   defp validate_params(conn) do
     with :ok <- validate_required_params(conn.query_params, @required_params),
          :ok <- validate_response_type(conn),
-         {:ok, client} <- get_client_from_params(conn.query_params),
-         :ok <- validate_redirect_uri(conn, client) do
+         {:ok, client} <-
+           get_client_from_params(conn.query_params),
+         :ok <- validate_redirect_uri(conn, client),
+         :ok <- validate_scope(conn, client) do
       {:ok, conn}
     end
   end
@@ -67,6 +69,19 @@ defmodule Coroidc.Endpoint.Authorization do
       :ok
     else
       {:error, "invalid redirect_uri", 400}
+    end
+  end
+
+  defp validate_scope(conn, client) do
+    invalid_scopes =
+      Map.fetch!(conn.query_params, "scope")
+      |> String.split(" ")
+      |> Enum.filter(&(&1 not in client.available_scopes))
+
+    if length(invalid_scopes) == 0 do
+      :ok
+    else
+      {:error, "invalid scopes :" <> Enum.join(invalid_scopes, ", "), 400}
     end
   end
 

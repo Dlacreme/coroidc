@@ -34,10 +34,14 @@ defmodule Coroidc.Endpoint.Token do
          ServerCallback.revoke_code(code) do
       case ServerCallback.insert_session(user_id, code: code, ip: conn.remote_ip) do
         {:ok, access_token, expires_in} ->
-          :ok
+          send_access_token(conn, %{access_token: access_token, expires_in: expires_in})
 
         {:ok, access_token, expires_in, refresh_token} ->
-          :ok
+          send_access_token(conn, %{
+            access_token: access_token,
+            expires_in: expires_in,
+            refresh_token: refresh_token
+          })
 
         {:error, reason} ->
           ServerCallback.handle_error(conn, reason, status: 500)
@@ -115,5 +119,10 @@ defmodule Coroidc.Endpoint.Token do
     else
       _any -> {:error, "redirect_uri mismatch", 400}
     end
+  end
+
+  defp send_access_token(conn, initial_payload) do
+    initial_payload
+    |> Map.merge(%{token_type: "Bearer", id_token: Coroidc.IdToken.generate()})
   end
 end

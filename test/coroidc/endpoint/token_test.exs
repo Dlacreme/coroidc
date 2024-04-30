@@ -13,7 +13,30 @@ defmodule Coroidc.Endpoint.TokenTest do
     {:ok, %{valid_params: params}}
   end
 
-  describe "call/2 for authorization_code" do
+  describe "call/2" do
+    test "it validate that grant_type is provided", %{valid_params: params} do
+      conn = token_conn(%{})
+
+      assert {:callback, :handle_error,
+              [
+                message: "grant_type is missing",
+                status: 400
+              ]} == Token.call(conn, [])
+    end
+
+    test "it validate the grant_type", %{valid_params: params} do
+      params = Map.put(params, "grant_type", "none")
+      conn = token_conn(params)
+
+      assert {:callback, :handle_error,
+              [
+                message: "grant_type 'none' is not supported",
+                status: 400
+              ]} == Token.call(conn, [])
+    end
+  end
+
+  describe "call/2 when grant_type is authorization_code" do
     test "trade a code for token", %{valid_params: params} do
       conn =
         token_conn(params)
@@ -45,27 +68,6 @@ defmodule Coroidc.Endpoint.TokenTest do
                 status: 400
               ]} ==
                Token.call(conn, [])
-    end
-
-    test "it validate that grant_type is provided", %{valid_params: params} do
-      conn = token_conn(%{})
-
-      assert {:callback, :handle_error,
-              [
-                message: "grant_type is missing",
-                status: 400
-              ]} == Token.call(conn, [])
-    end
-
-    test "it validate the grant_type", %{valid_params: params} do
-      params = Map.put(params, "grant_type", "none")
-      conn = token_conn(params)
-
-      assert {:callback, :handle_error,
-              [
-                message: "grant_type 'none' is not supported",
-                status: 400
-              ]} == Token.call(conn, [])
     end
 
     test "it validate the authorization header", %{valid_params: params} do
