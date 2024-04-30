@@ -4,14 +4,12 @@ defmodule Coroidc.IdToken do
 
   @issuer Application.compile_env(:coroidc, :issuer)
 
-  def generate(code) when is_struct(code, Coroidc.Code) do
-    header = header()
-
+  def generate(code) when is_struct(code, Coroidc.AccessToken) do
     claims =
       claims(code)
       |> maybe_add_nonce(code.nonce)
 
-    JOSE.JWT.sign(header, %{"k" => "your_secret_key"}, claims)
+    JOSE.JWT.sign(%{"k" => "your_secret_key"}, header(), claims)
     |> JOSE.JWS.compact()
   end
 

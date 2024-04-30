@@ -39,7 +39,7 @@ defmodule CoroidcTest.Server do
     case code do
       "error" -> {:error, "server error"}
       "expired" -> {:error, "code expired"}
-      _c -> {:ok, %Coroidc.Code{code: code}}
+      _c -> {:ok, %Coroidc.Code{code: code, client_id: "client"}}
     end
   end
 
