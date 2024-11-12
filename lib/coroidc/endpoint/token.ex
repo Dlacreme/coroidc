@@ -2,23 +2,44 @@ defmodule Coroidc.Endpoint.Token do
   use Coroidc.Endpoint
 
   alias Coroidc.BasicAuth
+  alias Coroidc.Code
+  alias Coroidc.AccessToken
 
   plug(Plug.Parsers,
     parsers: [:urlencoded, :json],
     json_decoder: Jason
   )
 
-  @required_params ~w(client_id code grant_type)
-
   def init(opts \\ []) do
     opts
   end
 
   def call(conn, _opts) do
-    with {:ok, conn} <- validate_params(conn),
-         conn <- disable_cache(conn) do
-      case Map.fetch!(conn.body_params, "grant_type") do
-        "authorization_code" -> authorization_code(conn)
+    conn = disable_cache(conn)
+
+    case Map.get(conn.body_params, "grant_type", nil) do
+      "authorization_code" ->
+        authorization_code(conn)
+
+      nil ->
+        ServerCallback.handle_error(conn, "grant_type is missing", status: 400)
+
+      other ->
+        ServerCallback.handle_error(conn, "grant_type '#{other}' is not supported", status: 400)
+    end
+  end
+
+  defp authorization_code(conn) do
+    with {:ok, conn} <- validate_params(conn, ~w(client_id code)),
+         {:ok, code} <- get_code_from_params(conn),
+         {:ok, code} <- consume_code(conn, code),
+         {:ok, %AccessToken{} = access_token} <- create_access_token(code) do
+      case ServerCallback.insert_access_token(access_token) do
+        {:ok, access_token} ->
+          IO.inspect(access_token)
+
+        {:error, reason} ->
+          ServerCallback.handle_error(conn, reason, status: 500)
       end
     else
       {:error, reason, status} ->
@@ -26,18 +47,13 @@ defmodule Coroidc.Endpoint.Token do
     end
   end
 
-  defp authorization_code(_conn) do
-  end
-
-  defp validate_params(conn) do
+  defp validate_params(conn, required_params) do
     with :ok <- validate_request_method(conn),
          :ok <- validate_content_type(conn),
-         :ok <- validate_required_params(conn.body_params, @required_params),
+         :ok <- validate_required_params(conn.body_params, required_params),
          :ok <- validate_grant_type(conn),
          {:ok, client} <- get_client_from_params(conn.body_params),
-         :ok <- BasicAuth.validate_authorization_header(conn, client),
-         {:ok, code} <- get_code_from_params(conn),
-         :ok <- validate_code(conn, code) do
+         :ok <- BasicAuth.validate_authorization_header(conn, client) do
       {:ok, conn}
     end
   end
@@ -76,25 +92,36 @@ defmodule Coroidc.Endpoint.Token do
     {:ok, code}
   end
 
-  defp validate_code(conn, code) do
-    case ServerCallback.get_code(code) do
-      :ok ->
-        :ok
+  defp consume_code(conn, code) do
+    case ServerCallback.consume_code(code) do
+      {:ok, %Code{redirect_uri: nil} = code} ->
+        {:ok, code}
 
-      {:ok, authorized_redirect_uri} ->
-        validate_redirect_uri(conn, authorized_redirect_uri)
+      {:ok, %Code{redirect_uri: authorized_redirect_uri} = code} ->
+        with :ok <- valid_redirect_uri?(conn, authorized_redirect_uri) do
+          {:ok, code}
+        end
 
       _any ->
         {:error, "invalid code", 400}
     end
   end
 
-  defp validate_redirect_uri(conn, authorized_redirect_uri) do
+  defp valid_redirect_uri?(conn, authorized_redirect_uri) do
     with {:ok, redirect_uri} <- Map.fetch(conn.body_params, "redirect_uri"),
          true <- redirect_uri == authorized_redirect_uri do
       :ok
     else
       _any -> {:error, "redirect_uri mismatch", 400}
     end
+  end
+
+  defp create_access_token(code) when is_struct(code, Coroidc.Code) do
+    info = Map.take(code, [:client_id, :user_id, :scope])
+
+    %AccessToken{}
+    |> Map.merge(info)
+    |> AccessToken.with_refresh_token?()
+    |> AccessToken.generate_id_token()
   end
 end

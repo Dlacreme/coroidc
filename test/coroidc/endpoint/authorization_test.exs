@@ -17,13 +17,14 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
 
   describe "call/2" do
     test "call Coroidc.Server#redirect_to_authentication callback", %{valid_params: params} do
-      conn = conn(:get, authorization_url(params))
+      conn =
+        conn(:get, authorization_url(params))
 
       assert {:callback, :redirect_to_authentication, []} == Authorization.call(conn, [])
     end
   end
 
-  describe "authorize/2" do
+  describe "authorize/3" do
     test "redirect with a valid code & state + nonce", %{valid_params: params} do
       conn =
         conn(:get, authorization_url(params))
@@ -88,6 +89,22 @@ defmodule Coroidc.Endpoint.AuthorizationTest do
       conn = conn(:get, authorization_url(params))
 
       assert {:callback, :handle_error, [message: "invalid redirect_uri", status: 400]} ==
+               Authorization.call(conn, [])
+    end
+
+    test "when scope is missing", %{valid_params: params} do
+      params = Map.delete(params, "scope")
+      conn = conn(:get, authorization_url(params))
+
+      assert {:callback, :handle_error, [message: "Missing parameters: scope", status: 400]} ==
+               Authorization.call(conn, [])
+    end
+
+    test "when scope is invalid", %{valid_params: params} do
+      params = Map.put(params, "scope", "invalid_scope")
+      conn = conn(:get, authorization_url(params))
+
+      assert {:callback, :handle_error, [message: "invalid scopes :invalid_scope", status: 400]} ==
                Authorization.call(conn, [])
     end
   end

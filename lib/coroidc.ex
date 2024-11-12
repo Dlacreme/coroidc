@@ -25,7 +25,6 @@ defmodule Coroidc do
   		handler: YourApp.Coroidc.ServerHandler.Implementation
   		repo: YourApp.Coroidc.ServerRepo.Implementation
 
-
   You can find a working implementation of Coroidc on
   https://github.com/dlacreme/oidcs
 
@@ -34,8 +33,15 @@ defmodule Coroidc do
 
   @doc """
   Finalize the authorization for a given user
+
+  Available options:
+  - code_duration: 3600 seconds. the duration of the code for the authorization_code flow
   """
-  def authorize(conn, user_id) do
-    Coroidc.Endpoint.Authorization.authorize(conn, user_id)
+  def authorize(
+        conn,
+        user_id,
+        opts \\ []
+      ) do
+    Coroidc.Endpoint.Authorization.authorize(conn, user_id, opts)
   end
 end
